@@ -107,6 +107,9 @@
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .gallery-item:hover {
@@ -116,16 +119,18 @@
 
         .gallery-item img {
             width: 100%;
-            height: auto;
-            min-height: 200px;
-            max-height: 400px;
+            height: 280px;
             object-fit: contain;
             background: #f8f9fa;
             border-bottom: 3px solid var(--primary-color);
+            flex-shrink: 0;
         }
 
         .gallery-item-content {
             padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .gallery-item-title {
@@ -138,13 +143,15 @@
         .gallery-item-description {
             color: var(--text-light);
             font-size: 0.95rem;
+            flex-grow: 1;
         }
 
         /* Tags */
         .tags {
             display: flex;
             gap: 0.5rem;
-            margin-top: 1rem;
+            margin-top: auto;
+            padding-top: 1rem;
             flex-wrap: wrap;
         }
 
