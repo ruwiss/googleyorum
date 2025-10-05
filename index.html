@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Yorum - Demo Galeri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --accent-color: #fbbc04;
+            --danger-color: #ea4335;
+            --dark-bg: #1a1a2e;
+            --light-bg: #f8f9fa;
+            --text-dark: #202124;
+            --text-light: #5f6368;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .brand-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-description {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Gallery Grid */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .gallery-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            min-height: 200px;
+            max-height: 400px;
+            object-fit: contain;
+            background: #f8f9fa;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .gallery-item-content {
+            padding: 1.5rem;
+        }
+
+        .gallery-item-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .gallery-item-description {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Tags */
+        .tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.3rem 0.8rem;
+            background: var(--light-bg);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .tag.admin {
+            background: #fee;
+            color: var(--danger-color);
+        }
+
+        .tag.user {
+            background: #e8f5e9;
+            color: var(--secondary-color);
+        }
+
+        .tag.dark {
+            background: #e3f2fd;
+            color: var(--primary-color);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            color: var(--text-light);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            margin-top: 4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            .logo {
+                height: 40px;
+            }
+
+            .brand-text {
+                font-size: 1rem;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gallery-item {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .gallery-item:nth-child(1) { animation-delay: 0.1s; }
+        .gallery-item:nth-child(2) { animation-delay: 0.2s; }
+        .gallery-item:nth-child(3) { animation-delay: 0.3s; }
+        .gallery-item:nth-child(4) { animation-delay: 0.4s; }
+        .gallery-item:nth-child(5) { animation-delay: 0.5s; }
+        .gallery-item:nth-child(6) { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="img/logo.png" alt="Google Yorum" class="logo">
+        <div class="brand-text">Google Yorum Scripti</div>
+    </header>
+
+    <div class="container">
+        <!-- User Panel Gallery -->
+        <section class="section">
+            <h2 class="section-title">Kullanıcı Paneli</h2>
+            <p class="section-description">Kullanıcı dostu arayüz ile görevlere katılın, kazançlarınızı takip edin</p>
+            <div class="gallery" id="user-gallery">
+                <div class="gallery-item" data-img="img/user/localhost_8080_dashboard.png">
+                    <img src="img/user/localhost_8080_dashboard.png" alt="Kullanıcı Dashboard">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Kullanıcı Dashboard</h3>
+                        <p class="gallery-item-description">Kişisel istatistikleriniz ve özet bilgiler</p>
+                        <div class="tags">
+                            <span class="tag user">Kullanıcı</span>
+                            <span class="tag">Dashboard</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/user/localhost_8080_gorevler.png">
+                    <img src="img/user/localhost_8080_gorevler.png" alt="Görevler">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Görevler</h3>
+                        <p class="gallery-item-description">Mevcut görevleri görüntüleyin ve katılın</p>
+                        <div class="tags">
+                            <span class="tag user">Kullanıcı</span>
+                            <span class="tag">Görevler</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/user/localhost_8080_gorev_31663-test-gorev-123.png">
+                    <img src="img/user/localhost_8080_gorev_31663-test-gorev-123.png" alt="Görev Detayı">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Görev Detayı</h3>
+                        <p class="gallery-item-description">Görev bilgileri ve katılım detayları</p>
+                        <div class="tags">
+                            <span class="tag user">Kullanıcı</span>
+                            <span class="tag">Görev Detay</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/user/localhost_8080_gorev_31663-test-gorev-123_kanit-gonder.png">
+                    <img src="img/user/localhost_8080_gorev_31663-test-gorev-123_kanit-gonder.png" alt="Kanıt Gönder">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Kanıt Gönderimi</h3>
+                        <p class="gallery-item-description">Tamamlanan görevler için kanıt yükleyin</p>
+                        <div class="tags">
+                            <span class="tag user">Kullanıcı</span>
+                            <span class="tag">Kanıt</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/user/localhost_8080_profile.png">
+                    <img src="img/user/localhost_8080_profile.png" alt="Profil">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Profil Sayfası</h3>
+                        <p class="gallery-item-description">Hesap bilgilerinizi görüntüleyin ve düzenleyin</p>
+                        <div class="tags">
+                            <span class="tag user">Kullanıcı</span>
+                            <span class="tag">Profil</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/user/localhost_8080_profile_odeme-talepleri.png">
+                    <img src="img/user/localhost_8080_profile_odeme-talepleri.png" alt="Ödeme Talepleri">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Ödeme Talepleri</h3>
+                        <p class="gallery-item-description">Kazançlarınızı çekin ve takip edin</p>
+                        <div class="tags">
+                            <span class="tag user">Kullanıcı</span>
+                            <span class="tag">Ödeme</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/user/localhost_8080_blog.png">
+                    <img src="img/user/localhost_8080_blog.png" alt="Blog">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Blog Sayfası</h3>
+                        <p class="gallery-item-description">Güncel duyuru ve içerikleri okuyun</p>
+                        <div class="tags">
+                            <span class="tag user">Kullanıcı</span>
+                            <span class="tag">Blog</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/user/localhost_8080_support.png">
+                    <img src="img/user/localhost_8080_support.png" alt="Destek">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Destek Merkezi</h3>
+                        <p class="gallery-item-description">Yardım alın ve destek talebi oluşturun</p>
+                        <div class="tags">
+                            <span class="tag user">Kullanıcı</span>
+                            <span class="tag">Destek</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Panel Gallery -->
+        <section class="section">
+            <h2 class="section-title">Admin Paneli</h2>
+            <p class="section-description">Güçlü admin paneli ile kullanıcıları, görevleri, ödemeleri ve tüm sistemi yönetin</p>
+            <div class="gallery" id="admin-gallery">
+                <div class="gallery-item" data-img="img/admin/localhost_8080_admin.png">
+                    <img src="img/admin/localhost_8080_admin.png" alt="Admin Ana Sayfa">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Admin Ana Sayfa</h3>
+                        <p class="gallery-item-description">Genel istatistikler ve özet bilgiler</p>
+                        <div class="tags">
+                            <span class="tag admin">Admin</span>
+                            <span class="tag">Dashboard</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/admin/localhost_8080_admin_gorevler.png">
+                    <img src="img/admin/localhost_8080_admin_gorevler.png" alt="Görev Yönetimi">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Görev Yönetimi</h3>
+                        <p class="gallery-item-description">Tüm görevleri görüntüleyin ve düzenleyin</p>
+                        <div class="tags">
+                            <span class="tag admin">Admin</span>
+                            <span class="tag">Görevler</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/admin/localhost_8080_admin_kullanicilar.png">
+                    <img src="img/admin/localhost_8080_admin_kullanicilar.png" alt="Kullanıcı Yönetimi">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Kullanıcı Yönetimi</h3>
+                        <p class="gallery-item-description">Kullanıcıları yönetin ve takip edin</p>
+                        <div class="tags">
+                            <span class="tag admin">Admin</span>
+                            <span class="tag">Kullanıcılar</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/admin/localhost_8080_admin_odeme-talepleri.png">
+                    <img src="img/admin/localhost_8080_admin_odeme-talepleri.png" alt="Ödeme Talepleri">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Ödeme Talepleri</h3>
+                        <p class="gallery-item-description">Ödeme taleplerini inceleyin ve onaylayın</p>
+                        <div class="tags">
+                            <span class="tag admin">Admin</span>
+                            <span class="tag">Ödemeler</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/admin/localhost_8080_admin_katilimlar.png">
+                    <img src="img/admin/localhost_8080_admin_katilimlar.png" alt="Katılımlar">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Katılım Yönetimi</h3>
+                        <p class="gallery-item-description">Görev katılımlarını izleyin</p>
+                        <div class="tags">
+                            <span class="tag admin">Admin</span>
+                            <span class="tag">Katılımlar</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/admin/localhost_8080_admin_bildirim_gonder.png">
+                    <img src="img/admin/localhost_8080_admin_bildirim_gonder.png" alt="Bildirim Gönder">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Bildirim Sistemi</h3>
+                        <p class="gallery-item-description">Kullanıcılara toplu bildirim gönderin</p>
+                        <div class="tags">
+                            <span class="tag admin">Admin</span>
+                            <span class="tag">Bildirimler</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/admin/localhost_8080_admin_site-ayarlari.png">
+                    <img src="img/admin/localhost_8080_admin_site-ayarlari.png" alt="Site Ayarları">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Site Ayarları</h3>
+                        <p class="gallery-item-description">Sistem genelindeki ayarları yapılandırın</p>
+                        <div class="tags">
+                            <span class="tag admin">Admin</span>
+                            <span class="tag">Ayarlar</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/admin/localhost_8080_admin_loglar.png">
+                    <img src="img/admin/localhost_8080_admin_loglar.png" alt="Sistem Logları">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Sistem Logları</h3>
+                        <p class="gallery-item-description">Tüm sistem aktivitelerini takip edin</p>
+                        <div class="tags">
+                            <span class="tag admin">Admin</span>
+                            <span class="tag">Loglar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dark Mode Gallery -->
+        <section class="section">
+            <h2 class="section-title">Dark Mode</h2>
+            <p class="section-description">Göz yormayan karanlık tema ile gece kullanımında konfor</p>
+            <div class="gallery" id="dark-gallery">
+                <div class="gallery-item" data-img="img/dark/localhost_8080_.png">
+                    <img src="img/dark/localhost_8080_.png" alt="Dark Ana Sayfa">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Dark Ana Sayfa</h3>
+                        <p class="gallery-item-description">Ana sayfa karanlık tema görünümü</p>
+                        <div class="tags">
+                            <span class="tag dark">Dark Mode</span>
+                            <span class="tag">Ana Sayfa</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/dark/localhost_8080_admin.png">
+                    <img src="img/dark/localhost_8080_admin.png" alt="Dark Admin Panel">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Dark Admin Panel</h3>
+                        <p class="gallery-item-description">Admin paneli dark mode görünümü</p>
+                        <div class="tags">
+                            <span class="tag dark">Dark Mode</span>
+                            <span class="tag admin">Admin</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/dark/localhost_8080_gorevler.png">
+                    <img src="img/dark/localhost_8080_gorevler.png" alt="Dark Görevler">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Dark Görevler</h3>
+                        <p class="gallery-item-description">Görevler sayfası dark mode</p>
+                        <div class="tags">
+                            <span class="tag dark">Dark Mode</span>
+                            <span class="tag">Görevler</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-item" data-img="img/dark/localhost_8080_gorev_31663-test-gorev-123.png">
+                    <img src="img/dark/localhost_8080_gorev_31663-test-gorev-123.png" alt="Dark Görev Detay">
+                    <div class="gallery-item-content">
+                        <h3 class="gallery-item-title">Dark Görev Detay</h3>
+                        <p class="gallery-item-description">Görev detay sayfası dark mode</p>
+                        <div class="tags">
+                            <span class="tag dark">Dark Mode</span>
+                            <span class="tag">Görev Detay</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Google Yorum | Modern Görev Yönetim Sistemi</p>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <img src="" alt="Büyük Görsel" id="modalImage">
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalClose = document.getElementById('modalClose');
+        const galleryItems = document.querySelectorAll('.gallery-item');
+
+        galleryItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const imgSrc = this.getAttribute('data-img');
+                modalImg.src = imgSrc;
+                modal.classList.add('active');
+            });
+        });
+
+        modalClose.addEventListener('click', function() {
+            modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                modal.classList.remove('active');
+            }
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
