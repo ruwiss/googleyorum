@@ -204,11 +204,37 @@
             position: relative;
         }
 
+        .modal-image-wrapper {
+            max-width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
+
+        .modal-image-wrapper.zoomed {
+            cursor: zoom-out;
+        }
+
+        .modal-image-wrapper.panning {
+            cursor: grabbing;
+        }
+
         .modal-content img {
             max-width: 100%;
             max-height: 80vh;
             border-radius: 10px;
             box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .modal-content img.zoomed {
+            cursor: move;
         }
 
         .modal-close {
@@ -304,6 +330,51 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            top: 20px;
+            right: 60px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .zoom-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .zoom-level {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
         /* Features */
         .features {
             display: grid;
@@ -394,6 +465,27 @@
 
             .modal-info {
                 bottom: -80px;
+            }
+
+            .zoom-controls {
+                top: 10px;
+                right: 10px;
+                flex-direction: column;
+            }
+
+            .zoom-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2rem;
+            }
+
+            .modal-image-wrapper {
+                max-width: 95%;
+                max-height: 70vh;
+            }
+
+            .modal-content img {
+                max-height: 70vh;
             }
         }
 
@@ -780,9 +872,17 @@
     <div class="modal" id="imageModal">
         <div class="modal-content">
             <span class="modal-close" id="modalClose">&times;</span>
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomIn" title="Yakınlaştır">+</button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="zoom-btn" id="zoomOut" title="Uzaklaştır">−</button>
+                <button class="zoom-btn" id="zoomReset" title="Sıfırla">↺</button>
+            </div>
             <span class="modal-nav modal-prev" id="modalPrev">‹</span>
             <span class="modal-nav modal-next" id="modalNext">›</span>
-            <img src="" alt="Büyük Görsel" id="modalImage">
+            <div class="modal-image-wrapper" id="imageWrapper">
+                <img src="" alt="Büyük Görsel" id="modalImage" draggable="false">
+            </div>
             <div class="modal-info">
                 <div class="modal-category" id="modalCategory"></div>
                 <div class="modal-title" id="modalTitle"></div>
@@ -795,16 +895,31 @@
         // Modal functionality
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
+        const imageWrapper = document.getElementById('imageWrapper');
         const modalClose = document.getElementById('modalClose');
         const modalPrev = document.getElementById('modalPrev');
         const modalNext = document.getElementById('modalNext');
         const modalCategory = document.getElementById('modalCategory');
         const modalTitle = document.getElementById('modalTitle');
         const modalCounter = document.getElementById('modalCounter');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomResetBtn = document.getElementById('zoomReset');
+        const zoomLevelDisplay = document.getElementById('zoomLevel');
         const galleryItems = document.querySelectorAll('.gallery-item');
         
         let currentIndex = 0;
         let allImages = [];
+        
+        // Zoom and Pan variables
+        let scale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let initialDistance = 0;
+        let initialScale = 1;
 
         // Build images array with metadata
         function buildImagesArray() {
@@ -833,6 +948,55 @@
 
         buildImagesArray();
 
+        // Reset zoom and pan
+        function resetZoom() {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+        }
+
+        // Update transform
+        function updateTransform() {
+            modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            zoomLevelDisplay.textContent = `${Math.round(scale * 100)}%`;
+            
+            // Update cursor
+            if (scale > 1) {
+                modalImg.classList.add('zoomed');
+                imageWrapper.classList.add('zoomed');
+            } else {
+                modalImg.classList.remove('zoomed');
+                imageWrapper.classList.remove('zoomed');
+            }
+            
+            // Update zoom buttons
+            zoomOutBtn.disabled = scale <= 0.5;
+            zoomInBtn.disabled = scale >= 5;
+        }
+
+        // Zoom functions
+        function zoomIn() {
+            scale = Math.min(scale + 0.25, 5);
+            updateTransform();
+        }
+
+        function zoomOut() {
+            scale = Math.max(scale - 0.25, 0.5);
+            if (scale === 1) {
+                translateX = 0;
+                translateY = 0;
+            }
+            updateTransform();
+        }
+
+        // Get distance between two touch points
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
         // Update modal content
         function updateModalContent(index) {
             if (index < 0 || index >= allImages.length) return;
@@ -844,6 +1008,9 @@
             modalTitle.textContent = image.title;
             modalCategory.textContent = image.category;
             modalCounter.textContent = `${currentIndex + 1} / ${allImages.length}`;
+            
+            // Reset zoom when changing images
+            resetZoom();
             
             // Update navigation buttons
             modalPrev.classList.toggle('disabled', currentIndex === 0);
@@ -879,14 +1046,128 @@
             }
         });
 
+        // Zoom controls
+        zoomInBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            zoomIn();
+        });
+
+        zoomOutBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            zoomOut();
+        });
+
+        zoomResetBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            resetZoom();
+        });
+
+        // Mouse wheel zoom
+        imageWrapper.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomIn();
+            } else {
+                zoomOut();
+            }
+        });
+
+        // Mouse drag to pan
+        modalImg.addEventListener('mousedown', function(e) {
+            if (scale > 1) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                imageWrapper.classList.add('panning');
+            }
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging && scale > 1) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            imageWrapper.classList.remove('panning');
+        });
+
+        // Touch gestures for mobile
+        let touchStartDistance = 0;
+        let touchStartScale = 1;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isTouching = false;
+
+        modalImg.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                // Pinch to zoom
+                e.preventDefault();
+                touchStartDistance = getDistance(e.touches[0], e.touches[1]);
+                touchStartScale = scale;
+            } else if (e.touches.length === 1 && scale > 1) {
+                // Pan
+                isTouching = true;
+                touchStartX = e.touches[0].clientX - translateX;
+                touchStartY = e.touches[0].clientY - translateY;
+            }
+        });
+
+        modalImg.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2) {
+                // Pinch to zoom
+                e.preventDefault();
+                const currentDistance = getDistance(e.touches[0], e.touches[1]);
+                const scaleChange = currentDistance / touchStartDistance;
+                scale = Math.min(Math.max(touchStartScale * scaleChange, 0.5), 5);
+                updateTransform();
+            } else if (e.touches.length === 1 && isTouching && scale > 1) {
+                // Pan
+                e.preventDefault();
+                translateX = e.touches[0].clientX - touchStartX;
+                translateY = e.touches[0].clientY - touchStartY;
+                updateTransform();
+            }
+        });
+
+        modalImg.addEventListener('touchend', function(e) {
+            if (e.touches.length === 0) {
+                isTouching = false;
+            }
+        });
+
+        // Double tap to zoom on mobile
+        let lastTap = 0;
+        modalImg.addEventListener('touchend', function(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            
+            if (tapLength < 300 && tapLength > 0) {
+                // Double tap detected
+                e.preventDefault();
+                if (scale === 1) {
+                    scale = 2;
+                } else {
+                    resetZoom();
+                }
+                updateTransform();
+            }
+            lastTap = currentTime;
+        });
+
         // Close modal
         modalClose.addEventListener('click', function() {
             modal.classList.remove('active');
+            resetZoom();
         });
 
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
                 modal.classList.remove('active');
+                resetZoom();
             }
         });
 
@@ -897,16 +1178,28 @@
             switch(e.key) {
                 case 'Escape':
                     modal.classList.remove('active');
+                    resetZoom();
                     break;
                 case 'ArrowLeft':
-                    if (currentIndex > 0) {
+                    if (currentIndex > 0 && scale === 1) {
                         updateModalContent(currentIndex - 1);
                     }
                     break;
                 case 'ArrowRight':
-                    if (currentIndex < allImages.length - 1) {
+                    if (currentIndex < allImages.length - 1 && scale === 1) {
                         updateModalContent(currentIndex + 1);
                     }
+                    break;
+                case '+':
+                case '=':
+                    zoomIn();
+                    break;
+                case '-':
+                case '_':
+                    zoomOut();
+                    break;
+                case '0':
+                    resetZoom();
                     break;
             }
         });
