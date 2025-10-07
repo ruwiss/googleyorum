@@ -187,11 +187,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 2000;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
+            padding: 0;
+            overflow: hidden;
         }
 
         .modal.active {
@@ -199,14 +200,18 @@
         }
 
         .modal-content {
-            max-width: 90%;
-            max-height: 90%;
+            width: 100%;
+            height: 100%;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-image-wrapper {
-            max-width: 90%;
-            max-height: 80vh;
+            width: 100%;
+            height: calc(100vh - 80px);
             overflow: hidden;
             position: relative;
             display: flex;
@@ -225,8 +230,10 @@
 
         .modal-content img {
             max-width: 100%;
-            max-height: 80vh;
-            border-radius: 10px;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
             box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
             transition: transform 0.3s ease;
             user-select: none;
@@ -238,37 +245,19 @@
         }
 
         .modal-close {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.1);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
+            display: none;
         }
 
         /* Modal Navigation */
         .modal-nav {
-            position: absolute;
+            position: fixed;
             top: 50%;
             transform: translateY(-50%);
             color: white;
             font-size: 3rem;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -277,11 +266,12 @@
             justify-content: center;
             transition: all 0.3s ease;
             user-select: none;
-            z-index: 10;
+            z-index: 12;
         }
 
         .modal-nav:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.4);
             transform: translateY(-50%) scale(1.1);
         }
 
@@ -301,43 +291,46 @@
 
         /* Modal Info */
         .modal-info {
-            position: absolute;
-            bottom: -60px;
+            position: fixed;
+            bottom: 0;
             left: 0;
             right: 0;
             color: white;
             text-align: center;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 1rem;
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 1rem 2rem;
             backdrop-filter: blur(10px);
+            z-index: 11;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .modal-category {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 0.3rem;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
         }
 
         .modal-title {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.25rem;
         }
 
         .modal-counter {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
         }
 
         /* Zoom Controls */
         .zoom-controls {
-            position: absolute;
+            position: fixed;
             top: 20px;
-            right: 60px;
+            right: 20px;
             display: flex;
             gap: 10px;
-            z-index: 10;
+            z-index: 12;
         }
 
         .zoom-btn {
@@ -452,6 +445,28 @@
                 padding: 2rem 1rem;
             }
 
+            .zoom-controls {
+                top: 10px;
+                right: 10px;
+                flex-direction: row;
+                gap: 6px;
+            }
+
+            .zoom-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 1.1rem;
+            }
+
+            .zoom-level {
+                padding: 0.35rem 0.7rem;
+                font-size: 0.75rem;
+            }
+
+            .modal-image-wrapper {
+                height: calc(100vh - 120px);
+            }
+
             .modal-nav {
                 width: 45px;
                 height: 45px;
@@ -467,21 +482,21 @@
             }
 
             .modal-info {
-                bottom: -80px;
+                padding: 0.75rem 1rem;
             }
 
-            .zoom-controls {
-                top: auto;
-                bottom: 120px;
-                right: auto;
-                left: 50%;
-                transform: translateX(-50%);
-                flex-direction: row;
-                gap: 8px;
+            .modal-category {
+                font-size: 0.65rem;
             }
 
-            .zoom-btn {
-                width: 35px;
+            .modal-title {
+                font-size: 0.85rem;
+            }
+
+            .modal-counter {
+                font-size: 0.65rem;
+            }
+        }
                 height: 35px;
                 font-size: 1.2rem;
             }
@@ -883,12 +898,10 @@
     <!-- Modal -->
     <div class="modal" id="imageModal">
         <div class="modal-content">
-            <span class="modal-close" id="modalClose">&times;</span>
             <div class="zoom-controls">
                 <button class="zoom-btn" id="zoomIn" title="Yakınlaştır">+</button>
                 <span class="zoom-level" id="zoomLevel">100%</span>
                 <button class="zoom-btn" id="zoomOut" title="Uzaklaştır">−</button>
-                <button class="zoom-btn" id="zoomReset" title="Sıfırla">↺</button>
             </div>
             <span class="modal-nav modal-prev" id="modalPrev">‹</span>
             <span class="modal-nav modal-next" id="modalNext">›</span>
@@ -908,7 +921,6 @@
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
         const imageWrapper = document.getElementById('imageWrapper');
-        const modalClose = document.getElementById('modalClose');
         const modalPrev = document.getElementById('modalPrev');
         const modalNext = document.getElementById('modalNext');
         const modalCategory = document.getElementById('modalCategory');
@@ -916,7 +928,6 @@
         const modalCounter = document.getElementById('modalCounter');
         const zoomInBtn = document.getElementById('zoomIn');
         const zoomOutBtn = document.getElementById('zoomOut');
-        const zoomResetBtn = document.getElementById('zoomReset');
         const zoomLevelDisplay = document.getElementById('zoomLevel');
         const galleryItems = document.querySelectorAll('.gallery-item');
         
@@ -1069,11 +1080,6 @@
             zoomOut();
         });
 
-        zoomResetBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            resetZoom();
-        });
-
         // Mouse wheel zoom
         imageWrapper.addEventListener('wheel', function(e) {
             e.preventDefault();
@@ -1171,11 +1177,6 @@
         });
 
         // Close modal
-        modalClose.addEventListener('click', function() {
-            modal.classList.remove('active');
-            resetZoom();
-        });
-
         modal.addEventListener('click', function(e) {
             if (e.target === modal) {
                 modal.classList.remove('active');
