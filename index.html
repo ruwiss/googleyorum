@@ -254,8 +254,9 @@
             top: 50%;
             transform: translateY(-50%);
             color: white;
-            font-size: 3rem;
-            line-height: 1;
+            font-size: 2.5rem;
+            font-weight: bold;
+            line-height: 60px;
             cursor: pointer;
             background: rgba(0, 0, 0, 0.7);
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -269,6 +270,7 @@
             user-select: none;
             z-index: 12;
             padding: 0;
+            text-align: center;
         }
 
         .modal-nav:hover {
@@ -472,8 +474,8 @@
             .modal-nav {
                 width: 45px;
                 height: 45px;
-                font-size: 2rem;
-                line-height: 1;
+                font-size: 1.8rem;
+                line-height: 45px;
             }
 
             .modal-prev {
@@ -906,8 +908,8 @@
                 <span class="zoom-level" id="zoomLevel">100%</span>
                 <button class="zoom-btn" id="zoomOut" title="Uzaklaştır">−</button>
             </div>
-            <span class="modal-nav modal-prev" id="modalPrev">‹</span>
-            <span class="modal-nav modal-next" id="modalNext">›</span>
+            <span class="modal-nav modal-prev" id="modalPrev">&lt;</span>
+            <span class="modal-nav modal-next" id="modalNext">&gt;</span>
             <div class="modal-image-wrapper" id="imageWrapper">
                 <img src="" alt="Büyük Görsel" id="modalImage" draggable="false">
             </div>
