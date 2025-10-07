@@ -226,11 +226,82 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            z-index: 10;
         }
 
         .modal-close:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: rotate(90deg);
+        }
+
+        /* Modal Navigation */
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .modal-nav:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .modal-nav.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .modal-prev {
+            left: 20px;
+        }
+
+        .modal-next {
+            right: 20px;
+        }
+
+        /* Modal Info */
+        .modal-info {
+            position: absolute;
+            bottom: -60px;
+            left: 0;
+            right: 0;
+            color: white;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-category {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-counter {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
         }
 
         /* Features */
@@ -305,6 +376,24 @@
 
             .container {
                 padding: 2rem 1rem;
+            }
+
+            .modal-nav {
+                width: 45px;
+                height: 45px;
+                font-size: 2rem;
+            }
+
+            .modal-prev {
+                left: 10px;
+            }
+
+            .modal-next {
+                right: 10px;
+            }
+
+            .modal-info {
+                bottom: -80px;
             }
         }
 
@@ -691,7 +780,14 @@
     <div class="modal" id="imageModal">
         <div class="modal-content">
             <span class="modal-close" id="modalClose">&times;</span>
+            <span class="modal-nav modal-prev" id="modalPrev">‹</span>
+            <span class="modal-nav modal-next" id="modalNext">›</span>
             <img src="" alt="Büyük Görsel" id="modalImage">
+            <div class="modal-info">
+                <div class="modal-category" id="modalCategory"></div>
+                <div class="modal-title" id="modalTitle"></div>
+                <div class="modal-counter" id="modalCounter"></div>
+            </div>
         </div>
     </div>
 
@@ -700,16 +796,90 @@
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
         const modalClose = document.getElementById('modalClose');
+        const modalPrev = document.getElementById('modalPrev');
+        const modalNext = document.getElementById('modalNext');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalCounter = document.getElementById('modalCounter');
         const galleryItems = document.querySelectorAll('.gallery-item');
+        
+        let currentIndex = 0;
+        let allImages = [];
 
-        galleryItems.forEach(item => {
+        // Build images array with metadata
+        function buildImagesArray() {
+            allImages = [];
+            const sections = [
+                { id: 'user-gallery', name: 'Kullanıcı Paneli' },
+                { id: 'admin-gallery', name: 'Admin Paneli' },
+                { id: 'dark-gallery', name: 'Dark Mode' }
+            ];
+
+            sections.forEach(section => {
+                const gallery = document.getElementById(section.id);
+                if (gallery) {
+                    const items = gallery.querySelectorAll('.gallery-item');
+                    items.forEach(item => {
+                        allImages.push({
+                            src: item.getAttribute('data-img'),
+                            title: item.querySelector('.gallery-item-title').textContent,
+                            category: section.name,
+                            element: item
+                        });
+                    });
+                }
+            });
+        }
+
+        buildImagesArray();
+
+        // Update modal content
+        function updateModalContent(index) {
+            if (index < 0 || index >= allImages.length) return;
+            
+            currentIndex = index;
+            const image = allImages[currentIndex];
+            
+            modalImg.src = image.src;
+            modalTitle.textContent = image.title;
+            modalCategory.textContent = image.category;
+            modalCounter.textContent = `${currentIndex + 1} / ${allImages.length}`;
+            
+            // Update navigation buttons
+            modalPrev.classList.toggle('disabled', currentIndex === 0);
+            modalNext.classList.toggle('disabled', currentIndex === allImages.length - 1);
+        }
+
+        // Open modal
+        galleryItems.forEach((item, index) => {
             item.addEventListener('click', function() {
+                // Find the index of this item in allImages array
                 const imgSrc = this.getAttribute('data-img');
-                modalImg.src = imgSrc;
-                modal.classList.add('active');
+                const imageIndex = allImages.findIndex(img => img.src === imgSrc);
+                
+                if (imageIndex !== -1) {
+                    updateModalContent(imageIndex);
+                    modal.classList.add('active');
+                }
             });
         });
 
+        // Navigation buttons
+        modalPrev.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (currentIndex > 0) {
+                updateModalContent(currentIndex - 1);
+            }
+        });
+
+        modalNext.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (currentIndex < allImages.length - 1) {
+                updateModalContent(currentIndex + 1);
+            }
+        });
+
+        // Close modal
         modalClose.addEventListener('click', function() {
             modal.classList.remove('active');
         });
@@ -720,10 +890,24 @@
             }
         });
 
-        // Close modal with Escape key
+        // Keyboard navigation
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                modal.classList.remove('active');
+            if (!modal.classList.contains('active')) return;
+            
+            switch(e.key) {
+                case 'Escape':
+                    modal.classList.remove('active');
+                    break;
+                case 'ArrowLeft':
+                    if (currentIndex > 0) {
+                        updateModalContent(currentIndex - 1);
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (currentIndex < allImages.length - 1) {
+                        updateModalContent(currentIndex + 1);
+                    }
+                    break;
             }
         });
 
